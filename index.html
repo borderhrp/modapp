@@ -1,0 +1,185 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>BRPC In-Game Mod App Dialogue</title>
+  <style>
+    :root{
+      --bg:#000000;
+      --card:#0d0d0d;
+      --border:rgba(255,255,255,0.08);
+      --text:#eaeaea;
+      --muted:rgba(255,255,255,0.5);
+      --radius:14px;
+      --scale:1.15;
+    }
+
+    *{box-sizing:border-box}
+    html,body{
+      margin:0;
+      background:var(--bg);
+      color:var(--text);
+      font-family: system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial, sans-serif;
+      display:flex;
+      justify-content:center;
+      align-items:flex-start;
+      padding:56px 24px;
+      font-size:calc(16px * var(--scale));
+    }
+
+    .container{
+      width:100%;
+      max-width:900px;
+    }
+
+    h1{
+      margin:0 0 10px 0;
+      font-size:calc(26px * var(--scale));
+      font-weight:600;
+    }
+
+    p.desc{
+      margin:0 0 36px 0;
+      font-size:calc(15px * var(--scale));
+      color:var(--muted);
+      line-height:1.6;
+    }
+
+    .grid{
+      display:grid;
+      grid-template-columns:repeat(auto-fill,minmax(260px,1fr));
+      gap:16px;
+    }
+
+    .box{
+      background:var(--card);
+      border:1px solid var(--border);
+      border-radius:var(--radius);
+      padding:22px;
+      font-size:calc(15px * var(--scale));
+      line-height:1.5;
+      cursor:pointer;
+      transition:background 0.2s ease, border-color 0.2s ease;
+      user-select:none;
+    }
+
+    .box:hover{
+      background:#111111;
+      border-color:rgba(255,255,255,0.15);
+    }
+
+    .box.copied{
+      border-color:#ffffff;
+    }
+
+    /* decision styles */
+    .box.accept{
+      border-color:rgba(80, 200, 120, 0.45);
+      background:linear-gradient(180deg, rgba(80,200,120,0.08), var(--card));
+    }
+
+    .box.deny{
+      border-color:rgba(220, 80, 80, 0.45);
+      background:linear-gradient(180deg, rgba(220,80,80,0.08), var(--card));
+    }
+
+    .toast{
+      position:fixed;
+      bottom:24px;
+      left:50%;
+      transform:translateX(-50%);
+      background:#0d0d0d;
+      border:1px solid var(--border);
+      padding:10px 16px;
+      border-radius:999px;
+      font-size:13px;
+      opacity:0;
+      pointer-events:none;
+      transition:opacity 0.2s ease;
+    }
+
+    .toast.show{opacity:1}
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h1>BRPC In-Game Mod App Dialogue</h1>
+    <p class="desc">Click any box below to copy its text. Paste them in-game when prompted.</p>
+
+    <div class="grid" id="grid">
+      <div class="box">Hey there, this is the in-game mod app to become a mod in BRPC! Let's get started.</div>
+      <div class="box">Firstly, join our comms, code is UXYZAHxurE</div>
+      <div class="box">Now, please ping me in the general chat.</div>
+      <div class="box">Alright let's get started with the questions.</div>
+      <div class="box">Why do you want to work here?</div>
+      <div class="box">How will you contribute to our place?</div>
+      <div class="box">Do you have any past experiences with Mod, Admin, etc? (If so, state where and what rank)</div>
+      <div class="box">What is AA?</div>
+      <div class="box">What is RDM?</div>
+      <div class="box">What is SRDM?</div>
+      <div class="box">What is VDM?</div>
+      <div class="box">What is FRP?</div>
+      <div class="box">What is NLR?</div>
+      <div class="box">Do you understand you can be fired for breaking rules or abusing?</div>
+        </div>
+
+    <section style="margin-top:48px">
+      <h2 style="font-size:calc(20px * var(--scale));margin:0 0 14px 0">Application Decision</h2>
+      <p class="desc" style="margin-bottom:22px">Review the user's answers and decide whether to accept or deny their application.</p>
+
+      <div class="grid">
+        <div class="box accept">Congratulations! You have passed, I will now rank you within the comms and give you mod commands.</div>
+        <div class="box deny">Unfortunately, you have failed, you can try again in 15 minutes.</div>
+      </div>
+    </section>
+  </div>
+
+  <div class="toast" id="toast">Copied</div>
+
+  <script>
+    const boxes = document.querySelectorAll('.box');
+    const toast = document.getElementById('toast');
+
+    async function copyText(text){
+      if(navigator.clipboard && navigator.clipboard.writeText){
+        try{
+          await navigator.clipboard.writeText(text);
+          return true;
+        }catch(e){ }
+      }
+
+      try{
+        const ta = document.createElement('textarea');
+        ta.value = text;
+        ta.style.position = 'fixed';
+        ta.style.left = '-9999px';
+        document.body.appendChild(ta);
+        ta.select();
+        const ok = document.execCommand('copy');
+        document.body.removeChild(ta);
+        return ok;
+      }catch(e){
+        return false;
+      }
+    }
+
+    function showToast(){
+      toast.classList.add('show');
+      clearTimeout(toast._t);
+      toast._t = setTimeout(()=>toast.classList.remove('show'),1200);
+    }
+
+    boxes.forEach(box=>{
+      box.addEventListener('click', async ()=>{
+        const ok = await copyText(box.textContent.trim());
+        if(ok){
+          box.classList.add('copied');
+          showToast();
+          setTimeout(()=>box.classList.remove('copied'),600);
+        }
+      });
+    });
+  </script>
+</body>
+</html>
